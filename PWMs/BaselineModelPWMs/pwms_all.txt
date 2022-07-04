@@ -1,0 +1,10 @@
+/scratch/spour98/aleksei/baseline_model_pwms/DSE_1_PWM.txt
+/scratch/spour98/aleksei/baseline_model_pwms/DSE_2_PWM.txt
+/scratch/spour98/aleksei/baseline_model_pwms/DSE_3_PWM.txt
+/scratch/spour98/aleksei/baseline_model_pwms/DSE_4_PWM.txt
+/scratch/spour98/aleksei/baseline_model_pwms/NUDT_PWM.txt
+/scratch/spour98/aleksei/baseline_model_pwms/PAS_Siepel.txt
+/scratch/spour98/aleksei/baseline_model_pwms/PAS_Hu.txt
+/scratch/spour98/aleksei/baseline_model_pwms/UGUA_Hu.txt
+/scratch/spour98/aleksei/baseline_model_pwms/PAS_hexamers_PWM.txt
+/scratch/spour98/aleksei/baseline_model_pwms/PolyU_PWM.txt
