@@ -11,9 +11,16 @@ In the scripts directory, run create_baseline_features_23112021.py. There are 4 
 
 Given that you may want to submit this to a computing cluster, a cognate wrapper script is provided in the subdirectory "wrapper scripts". 
 
+Your output file should have the rows as the number of bed entries (FASTAs), with the columns being depedent on the number of PWMs, the length of the sequences, and the number of windows. Ensure that all your sequences are of identical length.
+
 An example script is shown below:
 
 ```
 bedtools getfasta -fi ../../utils/hg38.fa -bed bed -s -name -fo fas
 python /scratch/spour98/scoring_aleksei_15112021/redo_04012022/training_chrsplit_baseline_16022022/create_baseline_features_23112021.py -f fas -pwms /scratch/spour98/scoring_aleksei_15112021/redo_04012022/training_chrsplit_baseline_16022022/CNN_baseline/disease/pwms_all.txt -out ./xx
+```
+
+## Model training
+
+Now, you can run the train_plot_new.py, from the scripts directory. Pass each of the datasets created during the previous step as arguments. 
 ```
