@@ -1,5 +1,5 @@
 # HumanGeneEnds
-The scripts and files in this repository allow you to locally train the baseline and cryptic models described in the *correction* to : Shkurin, A and Hughes, TR, "Known sequence features can explain half of all human gene ends". I also provide some of the underlying data behind the results in the paper. If you have any issues or questions please reach out at sara.eslampour@mail.utoronto.ca
+The scripts and files in this repository allow you to locally train the baseline and cryptic models described in the __*correction*__ to : Shkurin, A and Hughes, TR, "Known sequence features can explain half of all human gene ends". I also provide some of the underlying data behind the results in the paper. If you have any issues or questions please reach out at sara.eslampour@mail.utoronto.ca
 
 Below are the necessary steps to train each of the models
 
