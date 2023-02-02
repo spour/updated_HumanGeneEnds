@@ -1,0 +1,153 @@
+##collecting cryptic sites from the baseline scores of each window for all genes
+# Purpose: To intersect two BED files and append the results to another BED file
+
+# Define the input file 1
+input_file_1 = "<POSITIVE_CPA_sites_for_u1_10012022.bed>"
+
+# Define the output file
+output_file = " "
+
+# Loop through all files in the scoredd_beds directory with a '.r499.fix' extension, these are the bed files with all the baseline scores for each window, average with all CPA sites in genome
+for f in scoredd_beds/*.r499.fix:
+    # Use the bedtools intersect command to intersect the two BED files
+    # -wa: Write the original entry in A for each overlap
+    # -wb: Write the original entry in B for each overlap
+    # -s: force strandedness. If the feature in B is stranded, use the opposite strand for the feature in A.
+    # -f: Minimum overlap as a fraction of A.
+    # -r: Require same strandedness.
+    # -a: The A input file
+    # -b: The B input file
+    bedtools intersect -wa -wb -s -f 1.0 -r -a $input_file_1 -b $f >> $output_file
+
+
+-----------------------
+#Purpose: get average score of the baseline scores for all the CPA sites
+awk '!seen[$1$2$3$4$5$6]++' $output_file | awk '{ total += $11 } END { print total/NR }'
+
+-----------------------
+#Purpose: filter genome windows to those above the average score
+#This script is used to identify lines in the scored_beds files that meet a certain threshold for the 5th column and writes them to a new file. This can be useful for identifying specific patterns or characteristics in data.
+for f in scoredd_beds/*fix; do awk '{if ($5>=0.689899)print $0}' $f >> collected_global_cryptic_sites; done
+
+-----------------------
+#Purpose: merge overlapping/adjacent regions 
+#Reads the input file "collected_global_cryptic_sites" using the "cat" command.
+#Sorts the data by the first and second columns using the "sort" command.
+#Merges overlapping regions using the "bedtools merge" command with a maximum distance of 30 and preserving the strand information.
+#Combines the values in columns 5, 2, 3, 6, and 4 using the "collapse" option.
+#Writes the merged and combined data to the output file "collected_global_cryptic_sites.merged".
+cat collected_global_cryptic_sites | sort -k1,1 -k2,2n  | bedtools merge -d 30 -s -i - -c  5,2,3,6,4 -o collapse,collapse,collapse,distinct,collapse > collected_global_cryptic_sites.merged
+
+-----------------------
+#Purpose: in adjacent regions in collected_global_cryptic_sites.merged, select the window with the highest score
+import pandas as pd
+import numpy as np
+import sys
+
+def get_argmax(mx):
+    """
+    Return the index of the maximum value in the list mx.
+    """
+    return np.argmax(mx)
+
+def return_idx(listx, x):
+    """
+    Return the value in listx at index x.
+    """
+    return listx[x]
+
+def process_input(input_file, output_dir):
+    """
+    Read a tab-separated input file, extract information and write a new file.
+
+    Parameters:
+        input_file (str): the path to the input file.
+        output_dir (str): the directory where the output file will be written.
+
+    Returns:
+        None
+    """
+    x = pd.read_csv(input_file, sep='\t', header=None)
+    x[8] = x[3].apply(lambda x: [float(y) for y in x.split(',')])  #scores
+    x[9] = x[4].apply(lambda x: [int(y) for y in x.split(',')]) #start
+    x[10] = x[5].apply(lambda x: [int(y) for y in x.split(',')]) #end
+    x[11] = x[7].apply(lambda x: [str(y) for y in x.split(',')]) #names
+    x[12] = x[8].apply(get_argmax)
+    x[13] = x.apply(lambda x: return_idx(x[8],x[12]), axis=1) #max score
+    x[14] = x.apply(lambda x: return_idx(x[9],x[12]), axis=1) #start
+    x[15] = x.apply(lambda x: return_idx(x[10],x[12]), axis=1) #end
+    x[16] = x.apply(lambda x: return_idx(x[11],x[12]), axis=1) #name
+    full = x[[0, 14,15,16,13,6]]
+    out = output_dir
+    full.to_csv(out+"/"+"cryptic_regions", sep='\t', header=False, index=False)
+---------------------
+#Purpose: filter out all the overlaps with known C/APA sites
+bedtools intersect -v -a *cryptic_regions -b <known CPA sites from PolyADB>
+
+---------------------
+#Purpose: remove duplicates in a file
+awk '!seen[$0]++' $f
+
+---------------------
+#Purpose: merge the 500nt RF baseline model windows with the 140nt LR_cryptic model windows to get the ensemble scores
+
+#!/bin/bash
+
+function merge_files () {
+    """
+    This function takes in a file path as an argument and performs the following steps:
+    1. Creates a temporary file from the input file path
+    2. Searches for a file with a similar name in a specified directory
+    3. Creates a temporary file from the found file
+    4. Sorts both temporary files based on the midpoint of each line
+    5. Merges the two sorted files based on the midpoint
+    6. Adds a new column to the merged data with the product of two specific columns
+    7. Returns the merged data
+    8. Deletes both temporary files
+    """
+    FILE_PATH=$(mktemp)
+    FILE_PATH_name=$(realpath "$1")
+    cp $FILE_PATH_name $FILE_PATH
+    FILE_SEARCH=$(echo $(basename "$FILE_PATH_name" ) | cut -d\( -f1)
+    FILE_139_name=$(find  /lustre07/scratch/spour98/full_feat_vects/results_04112022_bed -name "$FILE_SEARCH*r139\.fix" )
+    FILE_139=$(mktemp)
+    cp $FILE_139_name $FILE_139
+    FILE_PATH_MID=$( awk -vOFS="\t" '{a=($2+$3)/2; print $0,a}' "$FILE_PATH" | sort -k7 )
+    FILE_139_MID=$(awk -vOFS="\t" '{a=($2+$3)/2; print $0,a}' "$FILE_139" | sort -k7)
+    MERGED=$(join  -t $'\t' -j 7 -o 1.1,1.2,1.3,1.4,1.5,1.6,1.7,2.1,2.2,2.3,2.4,2.5,2.6,2.7  <(echo "$FILE_PATH_MID")   <(echo "$FILE_139_MID"))
+    MERGED=$(echo "$MERGED" | awk -vOFS="\t" '{print $0,$5*$12}' )
+    echo "$MERGED"
+    rm -f $FILE_PATH $FILE_139
+}
+#you must supply with file of paths to the 500nt window scored bed files, $2 is the directory, $3 is the suffix e.g. "*merged")
+while read line
+    do
+    output="$(basename $line .bed.r499.fix)"
+    merge_files $line > "$2""/""$output""$3"
+done <$1
+
+---------------------
+#Purpose: from the ensemble model mutiplied scores, get the max for each gene and write to file.
+# This function takes in two parameters:
+# 1. A directory containing files that end with "*merged"
+# 2. A file name to write the top line of each merged file to
+
+find_top_line() {
+  local dir=$1
+  local out_file=$2
+
+  # loop through each file in the directory
+  for f in $dir/*merged; do
+    # check if the file exists and is not empty
+    if [ -s $f ]; then
+      # sort the file by column 15 in descending order and take the first line (top line)
+      top=$(sort -k15,15 -gr $f | head -1)
+      # write the top line to the output file
+      echo $top >> $out_file
+    fi
+  done
+}
+
+
+
+
