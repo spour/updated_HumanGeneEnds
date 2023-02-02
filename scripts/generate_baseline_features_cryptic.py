@@ -22,12 +22,7 @@ pd.options.display.max_columns = None
 
 print("imports successful")
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-f", "--fasta", type=str, help="sequences to score", required=True)
-parser.add_argument("-pwms", "--pwms", type=str, help="file containing list of paths of the PWMs you want", required=True)
-parser.add_argument("-out", "--outfile", type = str, help="gz out file", required=True)
-#parser.add_argument("-t", "--thresh", type=float, help="threshold for accuracy prediction", default=0)
-args = parser.parse_args()
+
 
 
 #####FUNCTIONS################
@@ -353,7 +348,6 @@ def read_pwms(pwm_file):
 #   total.to_csv(args.outfile+".featvect", sep = "\t", header = True,  mode='a')
 #   print(id+": done")
 # print("done")
-
 def process_fasta(args, pwms):
     names_id = []
     from pathlib import Path
@@ -386,6 +380,20 @@ def process_fasta(args, pwms):
             out_id = re.sub('[^a-zA-Z0-9 \n\.]', '_', id).strip('_')
             total.to_csv(args.outfile+".featvect", sep = "\t", header = True,  mode='a')
     print("done")
+
+
+if __name__ == '__main__':
+  parser = argparse.ArgumentParser()
+  parser.add_argument("-f", "--fasta", type=str, help="sequences to score", required=True)
+  parser.add_argument("-pwms", "--pwms", type=str, help="file containing list of paths of the PWMs you want", required=True)
+  parser.add_argument("-out", "--outfile", type = str, help="gz out file", required=True)
+  #parser.add_argument("-t", "--thresh", type=float, help="threshold for accuracy prediction", default=0)
+  args = parser.parse_args()
+
+  process_fasta(args)
+
+
+
 
 
 
