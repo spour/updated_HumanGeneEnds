@@ -1,4 +1,4 @@
-# Known 
+# Human Gene Ends
 
 The scripts and files in this repository allow you to locally train the baseline and cryptic models described in : Shkurin, A, Pour, S.E., and Hughes, TR, "Known sequence features can explain half of all human gene ends". 
 NOTE: for issues/questions, please reach out to sara.eslampour@mail.utoronto.ca, or t.hughes@utoronto.ca. Or open an issue on github. It is also highly recommended you submit to a computing cluster or parallelize the calculations
@@ -26,5 +26,18 @@ git clone https://github.com/spour/updated_HumanGeneEnds.git
 
 ## Baseline Model
 This script is used to generate the baseline feature matrices for a given fasta file using the position weight matrices (PWMs) located in "BaselineModelPWMs". The baseline model was trained on the following data:
-
+ ```
+ negatives_testing.bed as the test set for non-CPA sites
+ negatives_training.bed as the train set for non-CPA sites
+ Dominant_CPA_baseline_testing.bed as the test set for CPA sites
+ Dominant_CPA_baseline_training.bed as the train set for CPA sites
+ ```
+To make the featuer matrices, run the following on the stranded fasta files e.g.
+```
+bedtools getfasta -fi <path to hg38 fa> -s -bed <file> -fo <out file -name 
+```
+and then for each file
+```
+python generate_baseline_features.py -f <file> -pwms <BaselineModelPWMs> -out <out_path>
+```
 
