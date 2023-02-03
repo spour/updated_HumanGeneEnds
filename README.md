@@ -61,10 +61,7 @@ ZNF445::chr3:44441140-44477670(-)_1	0.9134519756102718
 ZNF445::chr3:44441140-44477670(-)_2	0.9139810592975619
 ZNF445::chr3:44441140-44477670(-)_3	0.9139818218498337
 ZNF445::chr3:44441140-44477670(-)_4	0.9161833625169807
-```
-
-### Additional files desc.
-The maximum scores for longest gene isoforms used in this study are "maximum_score_window_of_baseline.bed"; the cryptic sites found by the baseline RF are "Cryptic_CPA_sites.hg38.bed"; and APA sites from polyADB liftovered to hg38 with +/-250 nt flank are "human.PAS.txt.raw.hg38.bed.250region". 
+``` 
 
 ## Convert model output to bed
 To turn the above output to proper bed files where each window has the model prediction, there are two steps in "misc"
@@ -81,7 +78,13 @@ python model_scored_to_bed_step1.py -i files_to_initial.bed -o <out_path>
 sh model_scored_to_bed_step2.sh <path from step 1> <size of original window scored -1, e.g. 500-1=499> <out_suffix>
 ```
 
+### Additional files desc.
+The maximum scores for longest gene isoforms used in this study are "maximum_score_window_of_baseline.bed"; the cryptic sites found by the baseline RF are "Cryptic_CPA_sites.hg38.bed"; and APA sites from polyADB liftovered to hg38 with +/-250 nt flank are "human.PAS.txt.raw.hg38.bed.250region".
 
+###
+| Attempt | #1    | #2    |
+| :---:   | :---: | :---: |
+| Seconds | 301   | 283   |
 
 
 
