@@ -15,6 +15,7 @@ regex==2022.10.31
 scikit_learn==1.2.1
 scipy==1.4.1+computecanada
 skimage==0.0
+Python 3 (any version)
 ```
 
 ## Cloning
@@ -32,7 +33,7 @@ This script is used to generate the baseline feature matrices for a given fasta 
  Dominant_CPA_baseline_testing.bed as the test set for CPA sites
  Dominant_CPA_baseline_training.bed as the train set for CPA sites
  ```
-To make the featuer matrices, run the following on the stranded fasta files e.g.
+To make the feature matrices, run the following on the stranded fasta files e.g.
 ```
 bedtools getfasta -fi <path to hg38 fa> -s -bed <file> -fo <out file -name 
 ```
@@ -40,4 +41,10 @@ and then for each file
 ```
 python generate_baseline_features.py -f <file> -pwms <BaselineModelPWMs> -out <out_path>
 ```
+##### Make the model (either LR or RF) from the files above by running:
+
+```
+train_models.py -p <positive_training_csv> <negative_training_csv> <positive_testing_csv> <negative_testing_csv> -f [baseline_rf|baseline_lr] -out <out_path> -outp <outfiles_prefix>
+```
+
 
