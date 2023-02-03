@@ -87,7 +87,10 @@ The maximum scores for longest gene isoforms used in this study are "maximum_sco
 | average_score_bed.sh | remove duplicated in bed file and get average score | 
 | --- | --- | 
 | filter.sh | go through bed file and write those with score higher than <x> to a collated file |
-| :---:   | :---: | 
+| ---   | :---: | 
+ 
+ 
+ 
 | filter_out_apa.sh | remove regions in one file that intersect with another | 
 | :---:   | :---: | 
 | merge_adj.sh | sort bed file and collapse regions within 30 nt of each other, retaining information about what was collapsed  | 
