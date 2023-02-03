@@ -83,7 +83,7 @@ The maximum scores for longest gene isoforms used in this study are "maximum_sco
 
 ### Additional script descriptions in misc, utils mostly
 | File | #Description |   
-| :---:   | :---: | 
+| ---   | --- | 
 | average_score_bed.sh | remove duplicated in bed file and get average score | 
 | :---:   | :---: | 
 | filter.sh | go through bed file and write those with score higher than <x> to a collated file |
