@@ -116,7 +116,7 @@ def train_logistic_regression(X_train, y_train, out_path):
 
 def train_baseline_random_forest(X_train, y_train, out_path):
 	"""
-	This function trains a Logistic Regression classifier with unbalanced class weights on the given training data and saves the model.
+	This function trains a Random forest classifier with unbalanced class weights on the given training data and saves the model.
 	For baseline model.
 	Parameters:
 	X_train (np.ndarray): Input training data with shape (n_samples, n_features).
@@ -124,12 +124,28 @@ def train_baseline_random_forest(X_train, y_train, out_path):
 	out_path (str): Path to save the trained model.
 
 	Returns:
-	clf_unablanced (LogisticRegression): Trained Logistic Regression model.
+	clf_unablanced (LogisticRegression): Trained RF model.
 	"""
 	clf_unablanced  = RandomForestClassifier(n_jobs=-1, class_weight="balanced", n_estimators=30000, min_samples_split=5)
 	clf_unablanced.fit(X_train, y_train)
 	joblib.dump(clf_unablanced, out_path, compress=3)
+	return clf_unablanced
 
+def train_baseline_lr(X_train, y_train, out_path):
+	"""
+	This function trains a Random forest classifier with unbalanced class weights on the given training data and saves the model.
+	For baseline model.
+	Parameters:
+	X_train (np.ndarray): Input training data with shape (n_samples, n_features).
+	y_train (np.ndarray): Input training target data with shape (n_samples,).
+	out_path (str): Path to save the trained model.
+
+	Returns:
+	clf_unablanced (LogisticRegression): Trained RF model.
+	"""
+	clf_unablanced  = =LogisticRegression(n_jobs=-1, C=0.1, penalty = 'l1', tol=0.01, solver = 'saga', class_weight='balanced')
+	clf_unablanced.fit(X_train, y_train)
+	joblib.dump(clf_unablanced, out_path, compress=3)
 	return clf_unablanced
 
 
@@ -205,7 +221,7 @@ if __name__ == '__main__':
 	parser.add_argument("-ntr", "--negative_training_csv", type=str, help="csv of negative training file  with feature matrices", required=True)
 	parser.add_argument("-pte", "--positive_testing_csv", type=str, help="csv of positive testing file  with feature matrices", required=True)
 	parser.add_argument("-nte", "--negative_testing_csv", type=str, help="csv of negative testing file with feature matrices", required=True)
-	parser.add_argument('-f', '--function', type=str, choices=['baseline', 'cryptic'], required=True, help='Choose between baseline RF and cryptic LR')
+	parser.add_argument('-f', '--function', type=str, choices=['baseline_rf', 'baselined_lr','cryptic'], required=True, help='Choose between baseline RF, baseline LR, and cryptic LR')
 	parser.add_argument("-out", "--outdir", type=str, help="outdir", required=True)
 	parser.add_argument("-outp", "--outprefix", type=str, help="outprefix", required=True)
 	args = parser.parse_args()
@@ -216,10 +232,12 @@ if __name__ == '__main__':
 
 	pos_train, neg_train, pos_test, neg_test = read_csv_files(args.positive_training_csv, args.negative_training_csv, args.positive_testing_csv, args.negative_testing_csv)
 	X_train, y_train, X_test, y_test = read_in(pos_train, pos_test, neg_train, neg_test)
-	if args.function == 'baseline':
-		model = train_logistic_regression(X_train, y_train, args.outdir+"/" +args.outp)
+	if args.function == 'baseline_rf':
+		model = train_baseline_random_forest(X_train, y_train, args.outdir+"/" +args.outp)
+	elif args.function == 'baseline_lr':
+		model = train_baseline_lr(X_train, y_train, args.outdir+"/" +args.outp)
 	elif args.function == 'cryptic':
-		model = train_baseline_random_forest(X_train, y_train, args.outdir+"/" +args.outp) 	
+		model = train_logistic_regression(X_train, y_train, args.outdir+"/" +args.outp) 	
 
 	fpr, tpr, roc_auc = roc(y_test, X_test, model, axs[0])
 	precision, recall, aurpc = prc(y_test, X_test, model, axs[1])
