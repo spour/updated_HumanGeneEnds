@@ -27,13 +27,13 @@ print("imports successful")
 
 #####FUNCTIONS################
 def ematrix(m):
-  """
-  Energy matrix according to https://static-content.springer.com/esm/art%3A10.10
-  38%2Fnbt.1893/MediaObjects/41587_2011_BFnbt1893_MOESM84_ESM.pdf page 4 and
-  https://static-content.springer.com/esm/art%3A10.1038%2Fnbt.2486/MediaObjects/
-  41587_2013_BFnbt2486_MOESM15_ESM.pdf page 40. Takes in np array and outputs array
-  """
-  # neglog= -1*np.log(m)
+    """
+    Energy matrix according to https://static-content.springer.com/esm/art%3A10.10
+    38%2Fnbt.1893/MediaObjects/41587_2011_BFnbt1893_MOESM84_ESM.pdf page 4 and
+    https://static-content.springer.com/esm/art%3A10.1038%2Fnbt.2486/MediaObjects/
+    41587_2013_BFnbt2486_MOESM15_ESM.pdf page 40. Takes in np array and outputs array
+    """
+    # neglog= -1*np.log(m)
     m = -1 * np.log(m + 0.0001)
     x = np.amin(m, axis=0)
     ematric = np.subtract(m, x[None, ...])
