@@ -1,0 +1,10 @@
+Bio==1.5.3
+joblib==1.2.0+computecanada
+matplotlib==3.4.2+computecanada
+numba==0.56.4
+numpy==1.20.2+computecanada
+pandas==0.25.3+computecanada
+regex==2022.10.31
+scikit_learn==1.2.1
+scipy==1.4.1+computecanada
+skimage==0.0
