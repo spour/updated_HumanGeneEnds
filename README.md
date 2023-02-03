@@ -82,9 +82,9 @@ sh model_scored_to_bed_step2.sh <path from step 1> <size of original window scor
 The maximum scores for longest gene isoforms used in this study are "maximum_score_window_of_baseline.bed"; the cryptic sites found by the baseline RF are "Cryptic_CPA_sites.hg38.bed"; and APA sites from polyADB liftovered to hg38 with +/-250 nt flank are "human.PAS.txt.raw.hg38.bed.250region".
 
 ### Additional script descriptions in misc, utils mostly
-| File | #Description   |   
+| File | #Description |   
 | :---:   | :---: | 
-| average_score_bed.sh | remove duplicated in bed file and get average score  | 
+| average_score_bed.sh | remove duplicated in bed file and get average score | 
 | :---:   | :---: | 
 | filter.sh | go through bed file and write those with score higher than <x> to a collated file  |
 | :---:   | :---: | 
