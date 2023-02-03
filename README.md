@@ -78,10 +78,10 @@ python model_scored_to_bed_step1.py -i files_to_initial.bed -o <out_path>
 sh model_scored_to_bed_step2.sh <path from step 1> <size of original window scored -1, e.g. 500-1=499> <out_suffix>
 ```
 
-### Additional files desc.
+## Additional files desc.
 The maximum scores for longest gene isoforms used in this study are "maximum_score_window_of_baseline.bed"; the cryptic sites found by the baseline RF are "Cryptic_CPA_sites.hg38.bed"; and APA sites from polyADB liftovered to hg38 with +/-250 nt flank are "human.PAS.txt.raw.hg38.bed.250region".
 
-### Additional script descriptions in misc, utils mostly
+## Additional script descriptions in misc, utils mostly
 
 | File | #Description |   
 | --- | --- | 
