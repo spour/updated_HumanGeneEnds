@@ -419,7 +419,7 @@ if __name__ == '__main__':
   parser.add_argument("-pwms", "--pwms", type=str, help="file containing list of paths of the PWMs you want", required=True)
   parser.add_argument("-out", "--outfile", type = str, help="gz out file", required=True)
   parser.add_argument("-m", "--model", type = str, help="model to score with", required=True)
-  parser.add_argument('-f', '--function', type=str, choices=['baseline', 'cryptic'], required=True, help='Choose between baseline (500nt) or cryptic (140nt)')
+  parser.add_argument('-ft', '--function', type=str, choices=['baseline', 'cryptic'], required=True, help='Choose between baseline (500nt) or cryptic (140nt)')
   #parser.add_argument("-t", "--thresh", type=float, help="threshold for accuracy prediction", default=0)
   args = parser.parse_args()
 
