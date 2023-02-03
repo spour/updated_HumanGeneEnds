@@ -25,7 +25,7 @@ git clone https://github.com/spour/updated_HumanGeneEnds.git
 ```
 
 
-## Baseline Models
+## Train and predict using Models
 This script is used to generate the baseline feature matrices for a given fasta file using the position weight matrices (PWMs) located in "BaselineModelPWMs". The baseline model was trained on the following data:
  ```
  negatives_testing.bed as the test set for non-CPA sites
@@ -33,7 +33,7 @@ This script is used to generate the baseline feature matrices for a given fasta 
  Dominant_CPA_baseline_testing.bed as the test set for CPA sites
  Dominant_CPA_baseline_training.bed as the train set for CPA sites
  ```
-To make the feature matrices, run the following on the stranded fasta files e.g.
+To make the feature matrices, run the following on the stranded fasta files e.g. you need the name column
 ```
 bedtools getfasta -fi <path to hg38 fa> -s -bed <file> -fo <out file -name 
 ```
@@ -43,13 +43,44 @@ python generate_baseline_features.py -f <file> -pwms <BaselineModelPWMs> -out <o
 ```
 ##### Make the model (either LR or RF) from the files above by running:
 
+N.b. for creating/predicting with cryptic model you will need the libary of RNAhyb 7-mer scores ".../files/7mer_RHYB.npy"
+
 ```
 train_models.py -p <positive_training_csv> <negative_training_csv> <positive_testing_csv> <negative_testing_csv> -f [baseline_rf|baseline_lr] -out <out_path> -outp <outfiles_prefix>
 ```
+
 ##### Score and predict on genes with the model by running, where the last flag is if you're scoring baseline for windows of 500 or cryptic with windows of 140 as described in paper:
 ```
-python -f <fasta with seqs of interest> -pwms <path to pwms> -out <outdir and filename> -m <path to model> -ft [cryptic|baseline]
+python generate_score_cryptic_features.py -f <fasta with seqs of interest> -pwms <path to pwms> -out <outdir and filename> -m <path to model> -ft [cryptic|baseline]
 ```
+Output should be like:
+```
+0	1
+ZNF445::chr3:44441140-44477670(-)_0	0.9135617554490442
+ZNF445::chr3:44441140-44477670(-)_1	0.9134519756102718
+ZNF445::chr3:44441140-44477670(-)_2	0.9139810592975619
+ZNF445::chr3:44441140-44477670(-)_3	0.9139818218498337
+ZNF445::chr3:44441140-44477670(-)_4	0.9161833625169807
+```
+
+### Additional files desc.
+The maximum scores for longest gene isoforms used in this study are "maximum_score_window_of_baseline.bed"; the cryptic sites found by the baseline RF are "Cryptic_CPA_sites.hg38.bed"; and APA sites from polyADB liftovered to hg38 with +/-250 nt flank are "human.PAS.txt.raw.hg38.bed.250region". 
+
+## Convert model output to bed
+To turn the above output to proper bed files where each window has the model prediction, there are two steps in "misc"
+Get all paths for the files that were scored by the model, raw outputs e.g. if the files had suffix ".scored"
+```
+find "$(pwd -P)" -name  "*scored" > files_to_initial.bed
+```
+2. Run step 1 
+```
+python model_scored_to_bed_step1.py -i files_to_initial.bed -o <out_path>
+```
+3. Run step 2
+```
+sh model_scored_to_bed_step2.sh <path from step 1> <size of original window scored -1, e.g. 500-1=499> <out_suffix>
+```
+
 
 
 
