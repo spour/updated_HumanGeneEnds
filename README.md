@@ -25,7 +25,7 @@ git clone https://github.com/spour/updated_HumanGeneEnds.git
 ```
 
 
-## Baseline Model
+## Baseline Models
 This script is used to generate the baseline feature matrices for a given fasta file using the position weight matrices (PWMs) located in "BaselineModelPWMs". The baseline model was trained on the following data:
  ```
  negatives_testing.bed as the test set for non-CPA sites
@@ -46,5 +46,12 @@ python generate_baseline_features.py -f <file> -pwms <BaselineModelPWMs> -out <o
 ```
 train_models.py -p <positive_training_csv> <negative_training_csv> <positive_testing_csv> <negative_testing_csv> -f [baseline_rf|baseline_lr] -out <out_path> -outp <outfiles_prefix>
 ```
+##### Score and predict on genes with the model by running, where the last flag is if you're scoring baseline for windows of 500 or cryptic with windows of 140 as described in paper:
+```
+python -f <fasta with seqs of interest> -pwms <path to pwms> -out <outdir and filename> -m <path to model> -ft [cryptic|baseline]
+```
+
+
+
 
 
