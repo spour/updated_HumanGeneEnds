@@ -15,6 +15,8 @@ import time
 import argparse
 from Bio import SeqIO
 import argparse 
+from pathlib import Path
+import joblib
 from skimage.util.shape import view_as_windows
 from numpy.lib.recfunctions import unstructured_to_structured
 pd.options.display.precision = 16
@@ -348,37 +350,66 @@ def read_pwms(pwm_file):
 #   total.to_csv(args.outfile+".featvect", sep = "\t", header = True,  mode='a')
 #   print(id+": done")
 # print("done")
-def process_fasta(args, pwms):
+def process_fasta(args):
+    pwms = args.pwms
     names_id = []
-    from pathlib import Path
+    model = joblib.load(args.model)
     for i,record in enumerate(SeqIO.parse(args.fasta, "fasta")):
         id = record.id
         seq = str(record.seq).upper()
-        if len(seq) < 140:
-            continue
-        else:
-            scores = [pd.DataFrame(break_and_score_indiv_pwm(seq, 140, 1, 20, 10, pwms[name], name)) 
-                      for name in list(pwms) if pwms[name].shape[1] <= 20]
-            scores1 = pd.concat(scores, axis = 1)
-            ohee = one_hot_encode_along_channel_axis(seq)
-            ohee_500 = np.squeeze(view_as_windows(ohee, (20, 4), step=(10, 4)), 1)
-            mes_list = []
-            rhyb_list = []
-            for subseq in string_to_strided_app_alt(seq, 140, 1)[1]:
-                subseq = ''.join(i if i != 'N'  else random.choice(["A", "C", "T", "G"]) for i in subseq)
-                mes_list.append(pd.DataFrame(maxentscan(subseq)))
-                rhyb_list.append(pd.DataFrame(mod_rhyb(subseq)))
-            mes_scores = pd.concat(mes_list, axis = 0)
-            rnahyb_scores = pd.concat(rhyb_list, axis = 0)
-            mes_scores.reset_index(inplace=True, drop=True)
-            rnahyb_scores.reset_index(inplace=True, drop=True)
-            scores1.reset_index(inplace=True, drop=True)
-            total = pd.concat([mes_scores, rnahyb_scores, scores1], axis = 1)
-            names_id = [id+"_"+str(i) for i in range(total.shape[0])]
-            dictionary = dict(zip(list(np.arange(total.shape[0])), names_id))
-            total.rename(index=dictionary, inplace=True)
-            out_id = re.sub('[^a-zA-Z0-9 \n\.]', '_', id).strip('_')
-            total.to_csv(args.outfile+".featvect", sep = "\t", header = True,  mode='a')
+        if args.function == "cryptic":    
+            if len(seq) < 140:
+                continue
+            else:
+                scores = [pd.DataFrame(break_and_score_indiv_pwm(seq, 140, 1, 20, 10, pwms[name], name)) 
+                          for name in list(pwms) if pwms[name].shape[1] <= 20]
+                scores1 = pd.concat(scores, axis = 1)
+                ohee = one_hot_encode_along_channel_axis(seq)
+                ohee_500 = np.squeeze(view_as_windows(ohee, (20, 4), step=(10, 4)), 1)
+                mes_list = []
+                rhyb_list = []
+                for subseq in string_to_strided_app_alt(seq, 140, 1)[1]:
+                    subseq = ''.join(i if i != 'N'  else random.choice(["A", "C", "T", "G"]) for i in subseq)
+                    mes_list.append(pd.DataFrame(maxentscan(subseq)))
+                    rhyb_list.append(pd.DataFrame(mod_rhyb(subseq)))
+                mes_scores = pd.concat(mes_list, axis = 0)
+                rnahyb_scores = pd.concat(rhyb_list, axis = 0)
+                mes_scores.reset_index(inplace=True, drop=True)
+                rnahyb_scores.reset_index(inplace=True, drop=True)
+                scores1.reset_index(inplace=True, drop=True)
+                total = pd.concat([mes_scores, rnahyb_scores, scores1], axis = 1)
+                names_id = [f"{id}_{i}" for i in range(total.shape[0])]
+                dictionary = dict(zip(list(np.arange(total.shape[0])), names_id))
+                total.rename(index=dictionary, inplace=True)
+                out_id = re.sub('[^a-zA-Z0-9 \n\.]', '_', id).strip('_')
+                #total.to_csv(args.outfile+".featvect", sep = "\t", header = True,  mode='a')
+                f=total
+                output = np.column_stack([f.index, model.predict_proba(f.values)[:,1]])
+                DF=pd.DataFrame(output)
+                DF.to_csv(f"{args.outfile}/{id}.crypt.scored", sep="\t", header=True, index=False)
+                print(f"{id}: done")
+       if args.function == "baseline":   
+            if len(seq) < 500:
+                continue
+            else:
+                scores = [pd.DataFrame(break_and_score_indiv_pwm(seq, 500, 1, 30, 10, pwms[name], name))  for name in list(pwms)]
+                ohee = one_hot_encode_along_channel_axis(seq)
+                ohee_500 = np.squeeze(view_as_windows(ohee, (500, 4), step=(1,4)), 1)
+                t = [others(string_to_strided_app_alt(ohe_to_seq(ohee_500[x]), 30, 10)[1]) for x in range(ohee_500.shape[0])]
+                counts = pd.DataFrame(np.array(t).squeeze((1,2)))
+                assert counts.shape[0] == scores[0].shape[0]
+                scores.append(counts)
+                total = pd.concat(scores, axis =1 )
+                names_id = [f"{id}_{i}" for i in range(total.shape[0])]
+                dictionary = dict(zip(list(np.arange(total.shape[0])), names_id))
+                total.rename(index=dictionary, inplace=True)
+                out_fasta = Path(args.fasta).stem
+                out_id = re.sub('[^a-zA-Z0-9 \n\.]', '_', id).strip('_')
+                f=total
+                output = np.column_stack([f.index, model.predict_proba(f.values)[:,1]])
+                DF=pd.DataFrame(output)
+                DF.to_csv(f"{args.outfile}/{id}.crypt.scored", sep="\t", header=True, index=False)
+                print(f"{id}: done")
     print("done")
 
 
@@ -387,6 +418,8 @@ if __name__ == '__main__':
   parser.add_argument("-f", "--fasta", type=str, help="sequences to score", required=True)
   parser.add_argument("-pwms", "--pwms", type=str, help="file containing list of paths of the PWMs you want", required=True)
   parser.add_argument("-out", "--outfile", type = str, help="gz out file", required=True)
+  parser.add_argument("-m", "--model", type = str, help="model to score with", required=True)
+  parser.add_argument('-f', '--function', type=str, choices=['baseline', 'cryptic'], required=True, help='Choose between baseline (500nt) or cryptic (140nt)')
   #parser.add_argument("-t", "--thresh", type=float, help="threshold for accuracy prediction", default=0)
   args = parser.parse_args()
 
@@ -398,7 +431,5 @@ if __name__ == '__main__':
 
 
 
-#run like
-# python /scratch/spour98/scoring_aleksei_15112021/redo_04012022/training_chrsplit_baseline_16022022/rbp_u1_models/ensemble/create_baseline_features_23112021_140_rhybshort.py -f $1 -pwms $2 -out $3
 
 #create_baseline_features_23112021_140_rhybshort.py
