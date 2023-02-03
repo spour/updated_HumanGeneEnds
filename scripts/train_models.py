@@ -205,6 +205,7 @@ if __name__ == '__main__':
 	parser.add_argument("-ntr", "--negative_training_csv", type=str, help="csv of negative training file  with feature matrices", required=True)
 	parser.add_argument("-pte", "--positive_testing_csv", type=str, help="csv of positive testing file  with feature matrices", required=True)
 	parser.add_argument("-nte", "--negative_testing_csv", type=str, help="csv of negative testing file with feature matrices", required=True)
+	parser.add_argument('-f', '--function', type=str, choices=['baseline', 'cryptic'], required=True, help='Choose between baseline RF and cryptic LR')
 	parser.add_argument("-out", "--outdir", type=str, help="outdir", required=True)
 	parser.add_argument("-outp", "--outprefix", type=str, help="outprefix", required=True)
 	args = parser.parse_args()
@@ -215,7 +216,11 @@ if __name__ == '__main__':
 
 	pos_train, neg_train, pos_test, neg_test = read_csv_files(args.positive_training_csv, args.negative_training_csv, args.positive_testing_csv, args.negative_testing_csv)
 	X_train, y_train, X_test, y_test = read_in(pos_train, pos_test, neg_train, neg_test)
-	model = train_logistic_regression(X_train, y_train, args.outdir+"/" +args.outp) #or train_baseline_random_forest for the baseline RF
+	if args.function == 'baseline':
+		model = train_logistic_regression(X_train, y_train, args.outdir+"/" +args.outp)
+	elif args.function == 'cryptic':
+		model = train_baseline_random_forest(X_train, y_train, args.outdir+"/" +args.outp) 	
+
 	fpr, tpr, roc_auc = roc(y_test, X_test, model, axs[0])
 	precision, recall, aurpc = prc(y_test, X_test, model, axs[1])
 
