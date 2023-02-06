@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.761273
 # Human Gene Ends
 
 The scripts and files in this repository allow you to locally train the baseline and cryptic models described in : Shkurin, A, Pour, S.E., and Hughes, TR, "Known sequence features can explain half of all human gene ends". 
